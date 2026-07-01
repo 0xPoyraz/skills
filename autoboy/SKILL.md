@@ -29,7 +29,7 @@ AutoBoy is the missing link in your Bankr TGE toolkit:
 
 2. **Monitor & build demand** – Your community commits buy orders before TGE,
    so your token launches with a real order book instead of hoping people show up. AutoBoy's
-   dashboard shows who will buy, how much, and at what price, plus simulates your launch market cap based on AutoBoy's auto-buys.
+   dashboard shows who will buy, how much, and at what price, plus simulates your launch market cap based on AutoBoy's order book.
 
 3. **Quality holders & launch control** – AutoBoy's closed beta is an allowlist
    of high-signal users – the holders you want early. Allowlist specific buyers

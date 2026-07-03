@@ -8,7 +8,8 @@ description: Use Grantr MCP for account-safe Grantr backend workflows: Grantr va
 Use the hosted Grantr MCP server as the runtime integration surface.
 
 - MCP endpoint: `https://mcp.grantr.id/mcp`
-- Agent account handoff: `https://grantr.id/agent/setup?source=bankr`
+- Bankr account handoff: `https://grantr.id/agent/setup?source=bankr`
+- Codex account handoff: `https://grantr.id/agent/setup?source=codex`
 - Public contract and deeper docs: `https://github.com/grantr-id/grantr-agent-kit`
 
 Grantr lets agents inspect live state and prepare actions while the account owner and wallet provider retain approval, signing, broadcast, policy, and revocation control.
@@ -42,7 +43,15 @@ For Bankr-originated users, use this setup URL:
 https://grantr.id/agent/setup?source=bankr
 ```
 
+For Codex or agents that cannot receive a browser callback, use:
+
+```text
+https://grantr.id/agent/setup?source=codex
+```
+
 Add only non-secret context when available, such as `intent=savings`, `intent=fileverse`, `ownerEoa`, `wallet`, or `bankrWallet`. Include `returnTo` only when the return target was supplied by Bankr or another trusted wallet provider. Never include auth tokens, API keys, signatures, session cookies, private keys, seed phrases, or raw MCP authorization material in a handoff URL.
+
+The browser handoff creates or signs into the Grantr account, asks for passkey approval, and issues a short-lived one-time connect code. Bankr may receive `grantrConnectCode` and `grantrMcpEndpoint` through an allowlisted `returnTo` redirect only after that approval, then exchange the code through its own MCP/session backend. Codex and clients without browser callbacks should use the command shown by the handoff page.
 
 ## Bankr Context
 
@@ -60,10 +69,11 @@ When Bankr is absent, stay provider-agnostic: use the active wallet context retu
 If Bankr cannot pass wallet or session context into the MCP connection, do not ask for Bankr API keys and do not continue with private Grantr tools. Use this fallback:
 
 1. Call only public discovery tools.
-2. Send the user to `https://grantr.id/agent/setup?source=bankr`, adding safe context such as `intent=savings` when useful.
-3. Ask the user to create or sign into their Grantr account and link their Bankr wallet inside Grantr.
-4. Ask the user to return to Bankr and retry the original prompt after setup is complete.
-5. On retry, use `grantr_resolve_wallet_context` and `grantr_get_bankr_wallet` to confirm the link before any private action.
+2. Send the user to `https://grantr.id/agent/setup?source=bankr`, adding safe context such as `intent=savings` and an allowlisted `returnTo` when Bankr supplied one.
+3. Ask the user to create or sign into their Grantr account and approve MCP access with their Grantr passkey.
+4. If Bankr receives `grantrConnectCode` after Grantr passkey approval, Bankr should exchange it through its own MCP/session backend and retry the original prompt.
+5. If no callback is available, ask the user to return to Bankr and retry the original prompt after setup is complete.
+6. On retry, use `grantr_resolve_wallet_context` and `grantr_get_bankr_wallet` to confirm the link before any private action.
 
 ## Financial Action Pattern
 

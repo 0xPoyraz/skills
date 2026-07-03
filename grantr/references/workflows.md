@@ -44,10 +44,12 @@ Use this flow for requests such as "Write these research findings to Fileverse" 
 When Grantr MCP reports account setup is required:
 
 1. Stop the private workflow.
-2. Build a setup URL starting with `https://grantr.id/agent/setup?source=bankr` for Bankr-originated users, or `https://grantr.id/agent/setup?source=agent` otherwise.
+2. Build a setup URL starting with `https://grantr.id/agent/setup?source=bankr` for Bankr-originated users, `https://grantr.id/agent/setup?source=codex` for Codex, or `https://grantr.id/agent/setup?source=agent` otherwise.
 3. Add only non-secret query parameters already present in context, such as `intent=savings`, `intent=fileverse`, `ownerEoa`, `wallet`, or `bankrWallet`.
 4. Include `returnTo` only when it was supplied by Bankr or another trusted wallet provider.
-5. Ask the user to complete Grantr setup and reconnect or refresh the MCP session before continuing.
+5. Ask the user to complete Grantr setup and approve MCP access with their Grantr passkey.
+6. If Bankr supplied `returnTo`, Grantr redirects back only after browser login/setup and Grantr passkey approval, with `grantrConnectCode` and `grantrMcpEndpoint`; Bankr should exchange the code through its MCP/session backend.
+7. If no browser callback is available, use the command or instructions shown by the handoff page, then reconnect or refresh the MCP session before continuing.
 
 Never include API keys, bearer tokens, signed messages, session cookies, raw auth headers, private keys, seed phrases, or raw Fileverse tenant details in the setup URL or saved documents.
 
@@ -58,10 +60,11 @@ If Bankr cannot pass wallet or session context to Grantr MCP:
 1. Do not ask the user for a Bankr API key.
 2. Do not pass Bankr API keys, bearer tokens, signed messages, or session cookies through MCP.
 3. Use only `grantr_get_capabilities` and `grantr_get_execution_targets` until setup is complete.
-4. Send the user to `https://grantr.id/agent/setup?source=bankr`, optionally with `intent=savings` or `intent=fileverse`.
-5. Have the user create or sign into Grantr and link the Bankr wallet from the Grantr-controlled setup flow.
-6. Ask the user to retry the original Bankr prompt after setup.
-7. On retry, call `grantr_resolve_wallet_context` and `grantr_get_bankr_wallet` before any private tool or prepared transaction.
+4. Send the user to `https://grantr.id/agent/setup?source=bankr`, optionally with `intent=savings`, `intent=fileverse`, or an allowlisted `returnTo` supplied by Bankr.
+5. Have the user create or sign into Grantr and approve MCP access from the Grantr-controlled setup flow.
+6. If Bankr receives `grantrConnectCode` after Grantr passkey approval, exchange it through Bankr's MCP/session backend and retry the original prompt.
+7. If no callback is available, ask the user to retry the original Bankr prompt after setup.
+8. On retry, call `grantr_resolve_wallet_context` and `grantr_get_bankr_wallet` before any private tool or prepared transaction.
 
 This fallback is less automatic than direct Bankr MCP session metadata, but it keeps user approval, wallet linking, and account ownership inside Grantr and Bankr-controlled flows.
 

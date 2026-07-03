@@ -3,7 +3,8 @@
 Use the hosted Grantr MCP server as the only normal runtime integration surface.
 
 - Endpoint: `https://mcp.grantr.id/mcp`
-- Public Grantr account handoff: `https://grantr.id/agent/setup?source=bankr`
+- Bankr account handoff: `https://grantr.id/agent/setup?source=bankr`
+- Codex account handoff: `https://grantr.id/agent/setup?source=codex`
 - Do not call raw Grantr backend routes from an end-user agent workflow.
 
 ## Discovery vs Non-Discovery
@@ -16,6 +17,10 @@ Discovery tools are safe, read-only tools that can be called before the user has
 Non-discovery tools are every other Grantr MCP tool. They require MCP session owner context for a registered Grantr account before access to wallet, portfolio, savings, Bankr, Fileverse, or transaction receipt data.
 
 If a non-discovery tool returns `grantr_account_setup_required`, stop and use the account handoff URL. Do not keep retrying private tools until the account is set up and the MCP session has been refreshed.
+
+The setup page completes login/account setup in the browser, asks for Grantr passkey approval, and creates a short-lived one-time connect code. Bankr may receive `grantrConnectCode` plus `grantrMcpEndpoint` through an allowlisted `returnTo` redirect. Codex and clients without browser callbacks should use the command shown by the handoff page.
+
+Never ask users to paste raw backend context, Bankr API keys, Fileverse keys, session cookies, signatures, private keys, or seed phrases into chat.
 
 ## Tool Groups
 
